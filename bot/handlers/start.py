@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, Message
 
 from app import crud
 from app.database import async_session
-from bot.keyboards import interests_kb, universities_kb
+from bot.keyboards import interests_kb, main_menu_kb, universities_kb
 from bot.states import Onboarding
 
 router = Router(name="start")
@@ -18,9 +18,8 @@ async def cmd_start(message: Message, state: FSMContext) -> None:
 
     if user:
         await message.answer(
-            f"Xush kelibsiz qaytganingizdan xursandmiz, {user.full_name}! 👋\n\n"
-            "/events — faol eventlarni ko'rish\n"
-            "/my — mening registratsiyalarim"
+            f"Xush kelibsiz qaytganingizdan xursandmiz, {user.full_name}! 👋",
+            reply_markup=main_menu_kb(),
         )
         return
 
@@ -92,8 +91,7 @@ async def onboarding_finish(callback: CallbackQuery, state: FSMContext) -> None:
 
     await state.clear()
     await callback.message.edit_text(
-        f"Tabriklaymiz, {user.full_name}! Ro'yxatdan muvaffaqiyatli o'tdingiz. ✅\n\n"
-        "/events — faol eventlarni ko'rish\n"
-        "/my — mening registratsiyalarim"
+        f"Tabriklaymiz, {user.full_name}! Ro'yxatdan muvaffaqiyatli o'tdingiz. ✅"
     )
+    await callback.message.answer("Quyidagi tugmalardan foydalaning:", reply_markup=main_menu_kb())
     await callback.answer()
