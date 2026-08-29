@@ -9,7 +9,7 @@ from app.config import EVENT_FORMATS, INTEREST_CATEGORIES
 from app.models import Event, University
 
 BTN_EVENTS = "📅 Eventlar"
-BTN_MY = "👤 Profil "
+BTN_MY = "👤 Profil"
 
 
 def main_menu_kb() -> ReplyKeyboardMarkup:
