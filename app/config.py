@@ -48,6 +48,9 @@ EVENT_FORMATS = [
     "Guest Speaker",
     "Career Meeting",
     "University Meetup",
+    "Travel",
+    "Grants",
+    "Personal Development",
 ]
 
 # Fixed university list — MVP starting set (per TZ section 1).
