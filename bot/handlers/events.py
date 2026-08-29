@@ -6,7 +6,7 @@ from app import crud
 from app.crud import RegistrationError
 from app.database import async_session
 from app.models import RegistrationStatus
-from bot.keyboards import event_detail_kb, events_list_kb
+from bot.keyboards import BTN_EVENTS, BTN_MY, event_detail_kb, events_list_kb
 
 router = Router(name="events")
 
@@ -17,6 +17,7 @@ async def _require_user(telegram_id: int):
 
 
 @router.message(Command("events"))
+@router.message(F.text == BTN_EVENTS)
 async def cmd_events(message: Message) -> None:
     user = await _require_user(message.from_user.id)
     if not user:
@@ -101,6 +102,7 @@ async def cancel_registration(callback: CallbackQuery) -> None:
 
 
 @router.message(Command("my"))
+@router.message(F.text == BTN_MY)
 async def cmd_my_registrations(message: Message) -> None:
     user = await _require_user(message.from_user.id)
     if not user:
