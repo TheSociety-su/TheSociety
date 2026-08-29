@@ -1,7 +1,23 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
 
 from app.config import EVENT_FORMATS, INTEREST_CATEGORIES
 from app.models import Event, University
+
+BTN_EVENTS = "📅 Eventlar"
+BTN_MY = "🗒 Mening registratsiyalarim"
+
+
+def main_menu_kb() -> ReplyKeyboardMarkup:
+    """Persistent bottom keyboard shown after onboarding — replaces typing /events and /my."""
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=BTN_EVENTS), KeyboardButton(text=BTN_MY)]],
+        resize_keyboard=True,
+    )
 
 
 def universities_kb(universities: list[University]) -> InlineKeyboardMarkup:
