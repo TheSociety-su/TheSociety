@@ -156,8 +156,11 @@ async def cancel_event(session: AsyncSession, event: Event) -> Event:
 
 async def register_for_event(session: AsyncSession, user: User, event_id: int) -> Registration:
     """Locks the event row so concurrent registrations for the last seat
-    can't both succeed. Must run inside a single DB transaction."""
-    async with session.begin():
+    can't both succeed. Note: does NOT open its own `session.begin()` —
+    AsyncSession autobegins a transaction on first use, and the caller's
+    session may already be mid-transaction (e.g. from an earlier lookup),
+    so we commit/rollback manually instead of nesting a second begin()."""
+    try:
         event = (
             await session.execute(
                 select(Event).where(Event.id == event_id).with_for_update()
@@ -191,6 +194,7 @@ async def register_for_event(session: AsyncSession, user: User, event_id: int) -
 
         if current_count >= event.participant_limit:
             event.status = EventStatus.full
+            await session.commit()
             raise RegistrationError("Kechirasiz, joylar tugadi.")
 
         if existing:
@@ -204,12 +208,20 @@ async def register_for_event(session: AsyncSession, user: User, event_id: int) -
         if current_count + 1 >= event.participant_limit:
             event.status = EventStatus.full
 
+        await session.commit()
+    except RegistrationError:
+        await session.rollback()
+        raise
+    except Exception:
+        await session.rollback()
+        raise
+
     await session.refresh(registration)
     return registration
 
 
 async def cancel_registration(session: AsyncSession, user: User, event_id: int) -> None:
-    async with session.begin():
+    try:
         registration = (
             await session.execute(
                 select(Registration).where(
@@ -232,6 +244,14 @@ async def cancel_registration(session: AsyncSession, user: User, event_id: int) 
         ).scalar_one_or_none()
         if event and event.status == EventStatus.full:
             event.status = EventStatus.active  # a seat just opened up
+
+        await session.commit()
+    except RegistrationError:
+        await session.rollback()
+        raise
+    except Exception:
+        await session.rollback()
+        raise
 
 
 async def list_user_registrations(session: AsyncSession, user: User) -> list[Registration]:
